@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazan — everything store (no-JS version)</title>
+<style>
+  :root{
+    --dark:#131921;
+    --dark2:#232f3e;
+    --orange:#febd69;
+    --orange-dark:#f3a847;
+    --blue-link:#007185;
+    --price-red:#B12704;
+    --bg:#eaeded;
+    --card:#ffffff;
+    --border:#d5d9d9;
+    --text:#0f1111;
+    --text-light:#565959;
+    --green:#007600;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family: "Amazon Ember", Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  a{color:inherit;text-decoration:none;}
+
+  #cart-toggle{display:none;}
+
+  header.topnav{
+    background:var(--dark);
+    color:white;
+    display:flex;
+    align-items:center;
+    padding:8px 12px;
+    gap:12px;
+    flex-wrap:wrap;
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
+  .logo{
+    font-size:22px;
+    font-weight:800;
+    padding:8px 10px;
+    border:1px solid transparent;
+    border-radius:4px;
+    letter-spacing:-1px;
+  }
+  .logo:hover{border-color:white;cursor:pointer;}
+  .logo span{color:var(--orange);}
+
+  .deliver-to{
+    display:flex;flex-direction:column;font-size:12px;
+    padding:6px 10px;border:1px solid transparent;border-radius:4px;cursor:default;
+  }
+  .deliver-to:hover{border-color:white;}
+  .deliver-to b{font-size:14px;}
+
+  .search-bar{
+    flex:1;
+    display:flex;
+    min-width:200px;
+    height:40px;
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .search-bar select{
+    background:#f3f3f3;border:none;padding:0 8px;font-size:12px;color:#333;
+  }
+  .search-bar input{
+    flex:1;border:none;padding:0 10px;font-size:15px;outline:none;
+  }
+  .search-bar button{
+    background:var(--orange);
+    border:none;width:45px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .search-bar button:hover{background:var(--orange-dark);}
+
+  .nav-right{
+    display:flex;align-items:center;gap:6px;
+  }
+  .nav-item{
+    padding:6px 10px;border:1px solid transparent;border-radius:4px;
+    font-size:13px;cursor:default;line-height:1.2;
+  }
+  .nav-item:hover{border-color:white;}
+  .nav-item small{display:block;color:#ccc;font-size:11px;}
+  .nav-item b{font-size:14px;}
+
+  .cart-btn{
+    display:flex;align-items:end;gap:4px;padding:6px 10px;border:1px solid transparent;border-radius:4px;cursor:pointer;position:relative;
+  }
+  .cart-btn:hover{border-color:white;}
+  .cart-count{
+    color:var(--orange);font-weight:800;font-size:19px;margin-left:2px;
+  }
+  .cart-icon{font-size:28px;position:relative;}
+
+  nav.subnav{
+    background:var(--dark2);
+    color:white;
+    display:flex;
+    gap:4px;
+    padding:6px 12px;
+    font-size:13px;
+    overflow-x:auto;
+    position:sticky;
+    top:56px;
+    z-index:39;
+  }
+  nav.subnav a{
+    padding:6px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap;cursor:pointer;
+  }
+  nav.subnav a:hover{border-color:white;}
+
+  .hero{
+    background:linear-gradient(180deg,#e3e6e6 0%, var(--bg) 100%);
+    padding:20px 20px 40px;
+    text-align:center;
+    scroll-margin-top:110px;
+  }
+  .hero h1{font-size:26px;margin-bottom:6px;}
+  .hero p{color:var(--text-light);font-size:14px;}
+
+  main{
+    max-width:1300px;
+    margin:-30px auto 0;
+    padding:0 16px;
+  }
+
+  .category-section{
+    margin-bottom:36px;
+    scroll-margin-top:110px;
+  .category-heading{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:12px 16px;
+    font-size:18px;
+    margin-bottom:16px;
+  }
+  .category-heading span{
+    display:block;
+    font-size:12px;
+    font-weight:400;
+    color:var(--text-light);
+    margin-top:2px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px;
+  }
+
+  .product-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    transition:box-shadow .15s ease, transform .1s ease;
+  }
+  .product-card:hover{
+    box-shadow:0 4px 14px rgba(0,0,0,0.12);
+    transform:translateY(-2px);
+  }
+  .product-img{
+    height:160px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:64px;
+    margin-bottom:10px;
+    background:#fafafa;
+    border-radius:4px;
+  }
+  .product-title{
+    font-size:14px;
+    line-height:1.3;
+    margin-bottom:6px;
+    color:var(--text);
+    min-height:36px;
+  }
+  .rating{
+    display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:13px;
+  }
+  .stars{color:#ffa41c;letter-spacing:1px;}
+  .rating .count{color:var(--blue-link);font-size:12px;}
+
+  .price-row{
+    display:flex;align-items:baseline;gap:4px;margin-bottom:4px;
+  }
+  .price-symbol{font-size:12px;position:relative;top:-6px;color:var(--price-red);}
+  .price-whole{font-size:21px;color:var(--price-red);font-weight:500;}
+  .price-old{
+    font-size:12px;color:var(--text-light);text-decoration:line-through;margin-left:4px;
+  }
+  .prime-badge{
+    font-size:11px;color:var(--text-light);margin-bottom:10px;
+  }
+  .prime-badge b{color:#00a8e1;}
+  .add-btn{
+    margin-top:auto;
+    background:var(--orange);
+    border:1px solid #a88734;
+    border-radius:20px;
+    padding:8px 10px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:600;
+    text-align:center;
+    display:block;
+  }
+  .add-btn:hover{background:var(--orange-dark);}
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.4);
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+    z-index:50;
+  }
+  #cart-toggle:checked ~ .overlay{
+    opacity:1;pointer-events:auto;
+  }
+
+  .cart-drawer{
+    position:fixed;top:0;right:0;bottom:0;
+    width:380px;max-width:90vw;
+    background:white;
+    box-shadow:-4px 0 20px rgba(0,0,0,0.2);
+    transform:translateX(100%);
+    transition:transform .25s ease;
+    z-index:51;
+    display:flex;
+    flex-direction:column;
+  }
+  #cart-toggle:checked ~ .cart-drawer{
+    transform:translateX(0);
+  }
+  .cart-header{
+    padding:16px;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .cart-header h2{font-size:18px;}
+  .close-cart{
+    background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-light);
+    display:block;
+  }
+  .cart-items{
+    flex:1;overflow-y:auto;padding:10px 16px;
+  }
+  .cart-item{
+    display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #eee;
+  }
+  .cart-item .icon{font-size:36px;}
+  .cart-item .info{flex:1;}
+  .cart-item .info .title{font-size:13px;margin-bottom:4px;}
+  .cart-item .info .price{color:var(--price-red);font-weight:600;font-size:14px;}
+  .qty-display{
+    font-size:12px;color:var(--text-light);margin-top:6px;
+  }
+  .cart-footer{
+    padding:16px;border-top:1px solid var(--border);
+  }
+  .cart-total{
+    display:flex;justify-content:space-between;font-size:16px;margin-bottom:12px;
+  }
+  .checkout-btn{
+    width:100%;padding:10px;background:var(--orange);border:1px solid #a88734;
+    border-radius:20px;font-weight:600;cursor:pointer;font-size:14px;
+    display:block;text-align:center;
+  }
+  .checkout-btn:hover{background:var(--orange-dark);}
+  .demo-note{
+    font-size:11px;color:var(--text-light);text-align:center;padding:8px 16px 0;
+  }
+
+  footer{
+    background:var(--dark2);color:white;text-align:center;padding:24px;font-size:13px;margin-top:40px;
+  }
+
+  @media (max-width:600px){
+    .search-bar select{display:none;}
+    .nav-right .nav-item:not(.cart-btn){display:none;}
+    nav.subnav{top:52px;}
+  }
+</style>
+</head>
+<body>
+<input type="checkbox" id="cart-toggle">
+
+<header class="topnav">
+  <a class="logo" href="#top">amaz<span>on</span></a>
+  <div class="deliver-to">
+    <span>Deliver to</span>
+    <b>📍 Chennai 600001</b>
+  </div>
+  <div class="search-bar">
+    <select>
+      <option>All</option>
+      <option>Electronics</option>
+      <option>Home</option>
+      <option>Fashion</option>
+      <option>Books</option>
+      <option>Fitness</option>
+    </select>
+    <input type="text" placeholder="Search">
+    <button type="button">🔍</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-item">
+      <small>Hello, sign in</small>
+      <b>Account &amp; Lists ▾</b>
+    </div>
+    <div class="nav-item">
+      <small>Returns</small>
+      <b>&amp; Orders</b>
+    </div>
+    <label class="nav-item cart-btn" for="cart-toggle">
+      <span class="cart-icon">🛒<span class="cart-count">3</span></span>
+      <b>Cart</b>
+    </label>
+  </div>
+</header>
+
+<nav class="subnav">
+  <a href="#top">All</a>
+  <a href="#electronics">Electronics</a>
+  <a href="#home">Home &amp; Kitchen</a>
+  <a href="#fashion">Fashion</a>
+  <a href="#books">Books</a>
+  <a href="#fitness">Sports &amp; Fitness</a>
+</nav>
+
+<section class="hero" id="top">
+  <h1>Great deals, delivered fast.</h1>
+  <p>Free delivery on eligible orders over ₹499</p>
+</section>
+
+<main>
+
+  <section class="category-section" id="electronics">
+    <div class="category-heading">
+      Electronics
+      <span>Headphones, monitors, keyboards and more</span>
+    </div>
+    <div class="grid">
+
+      <div class="product-card">
+        <div class="product-img">🎧</div>
+        <div class="product-title">Wireless Bluetooth Earbuds with Charging Case</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">2,418</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">1,499</span><span class="price-old">₹2,999</span></div>
+        <div class="prime-badge"><b>50% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">🖥️</div>
+        <div class="product-title">27-inch 4K UHD Monitor</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">1,023</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">16,999</span><span class="price-old">₹21,999</span></div>
+        <div class="prime-badge"><b>Prime</b> · Free delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">⌨️</div>
+        <div class="product-title">Mechanical Gaming Keyboard RGB</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">718</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">2,499</span><span class="price-old">₹3,499</span></div>
+        <div class="prime-badge"><b>28% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category-section" id="home">
+    <div class="category-heading">
+      Home &amp; Kitchen
+      <span>Everyday essentials for your space</span>
+    </div>
+    <div class="grid">
+
+      <div class="product-card">
+        <div class="product-img">🧴</div>
+        <div class="product-title">Stainless Steel Insulated Water Bottle, 1L</div>
+        <div class="rating"><span class="stars">★★★★★</span><span class="count">5,211</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">499</span><span class="price-old">₹799</span></div>
+        <div class="prime-badge"><b>Prime</b> · Free delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">🍳</div>
+        <div class="product-title">Non-Stick Cookware Set, 5 Pieces</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">441</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">1,799</span><span class="price-old">₹2,599</span></div>
+        <div class="prime-badge"><b>31% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">🛏️</div>
+        <div class="product-title">Memory Foam Pillow, Set of 2</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">2,033</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">899</span><span class="price-old">₹1,399</span></div>
+        <div class="prime-badge"><b>Prime</b> · Free delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category-section" id="fashion">
+    <div class="category-heading">
+      Fashion
+      <span>Clothing and footwear picks</span>
+    </div>
+    <div class="grid">
+
+      <div class="product-card">
+        <div class="product-img">👟</div>
+        <div class="product-title">Men's Running Shoes - Lightweight Mesh</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">892</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">1,899</span><span class="price-old">₹2,499</span></div>
+        <div class="prime-badge"><b>24% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">👗</div>
+        <div class="product-title">Women's Cotton Kurta - Printed</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">302</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">699</span><span class="price-old">₹1,199</span></div>
+        <div class="prime-badge"><b>42% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category-section" id="books">
+    <div class="category-heading">
+      Books
+      <span>Bestsellers and reader favorites</span>
+    </div>
+    <div class="grid">
+
+      <div class="product-card">
+        <div class="product-img">📕</div>
+        <div class="product-title">Atomic Habits - Paperback Book</div>
+        <div class="rating"><span class="stars">★★★★★</span><span class="count">15,302</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">349</span><span class="price-old">₹499</span></div>
+        <div class="prime-badge"><b>30% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">📗</div>
+        <div class="product-title">The Psychology of Money - Paperback</div>
+        <div class="rating"><span class="stars">★★★★★</span><span class="count">9,820</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">299</span><span class="price-old">₹399</span></div>
+        <div class="prime-badge"><b>25% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category-section" id="fitness">
+    <div class="category-heading">
+      Sports &amp; Fitness
+      <span>Gear for your workouts</span>
+    </div>
+    <div class="grid">
+
+      <div class="product-card">
+        <div class="product-img">🏋️</div>
+        <div class="product-title">Adjustable Dumbbell Set 20kg</div>
+        <div class="rating"><span class="stars">★★★★☆</span><span class="count">634</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">2,999</span><span class="price-old">₹3,999</span></div>
+        <div class="prime-badge"><b>25% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img">🧘</div>
+        <div class="product-title">Yoga Mat with Carrying Strap</div>
+        <div class="rating"><span class="stars">★★★★★</span><span class="count">1,502</span></div>
+        <div class="price-row"><span class="price-symbol">₹</span><span class="price-whole">599</span><span class="price-old">₹899</span></div>
+        <div class="prime-badge"><b>33% off</b> · Prime delivery</div>
+        <label class="add-btn" for="cart-toggle">Add to Cart</label>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>This is a learning project — not affiliated with Amazon.com, Inc.</p>
+  <p style="margin-top:6px;color:#999;">Built with HTML &amp; CSS only — no JavaScript</p>
+</footer>
+<label class="overlay" for="cart-toggle"></label>
+<aside class="cart-drawer">
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <label class="close-cart" for="cart-toggle">✕</label>
+  </div>
+  <p class="demo-note">Static demo cart — quantities can't change without JavaScript</p>
+  <div class="cart-items">
+    <div class="cart-item">
+      <div class="icon">🎧</div>
+      <div class="info">
+        <div class="title">Wireless Bluetooth Earbuds with Charging Case</div>
+        <div class="price">₹1,499</div>
+        <div class="qty-display">Qty: 1</div>
+      </div>
+    </div>
+    <div class="cart-item">
+      <div class="icon">📕</div>
+      <div class="info">
+        <div class="title">Atomic Habits - Paperback Book</div>
+        <div class="price">₹349</div>
+        <div class="qty-display">Qty: 1</div>
+      </div>
+    </div>
+    <div class="cart-item">
+      <div class="icon">🧘</div>
+      <div class="info">
+        <div class="title">Yoga Mat with Carrying Strap</div>
+        <div class="price">₹599</div>
+        <div class="qty-display">Qty: 1</div>
+      </div>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Subtotal</span>
+      <span>₹2,447</span>
+    </div>
+    <label class="checkout-btn" for="cart-toggle">Proceed to Checkout</label>
+  </div>
+</aside>
+</body>
+</html>
